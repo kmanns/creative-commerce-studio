@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.aio
+dist/
+coverage/
+.DS_Store
+*.log

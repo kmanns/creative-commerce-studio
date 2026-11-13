@@ -1,0 +1,501 @@
+/*
+ * Creative Commerce Studio — layout for the Workspace library panel.
+ * Controls come from Spectrum Web Components (Spectrum 2 theme); custom parts
+ * (cards, tiles, inline alerts) use Spectrum 2 tokens so they match.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+.ccs-loading-boot {
+  padding: 16px;
+  font: 14px system-ui, sans-serif;
+}
+
+.ccs-theme {
+  display: block;
+  min-height: 100vh;
+  background: var(--spectrum-background-base-color);
+  color: var(--spectrum-gray-800);
+  font-family: var(--spectrum-sans-font-family-stack);
+  font-size: var(--spectrum-font-size-100);
+  line-height: 1.5;
+}
+
+.ccs-app {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-300);
+  padding: var(--spectrum-spacing-300);
+  max-width: 640px;
+}
+
+/* ---------- header ---------- */
+
+.ccs-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-200);
+}
+
+.ccs-brand {
+  display: flex;
+  gap: var(--spectrum-spacing-200);
+  align-items: center;
+}
+
+.ccs-app-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--spectrum-corner-radius-medium-default);
+  background: linear-gradient(135deg, var(--spectrum-accent-color-800), var(--spectrum-accent-color-1000, var(--spectrum-accent-color-900)));
+  color: var(--spectrum-white, #fff);
+}
+
+.ccs-title {
+  margin: 0;
+  font-size: var(--spectrum-font-size-300);
+  font-weight: var(--spectrum-heading-sans-serif-font-weight, 800);
+  line-height: 1.3;
+  color: var(--spectrum-gray-900);
+}
+
+.ccs-subtitle {
+  margin: 0;
+  font-size: var(--spectrum-font-size-75);
+  color: var(--spectrum-gray-700);
+}
+
+.ccs-tabs {
+  width: 100%;
+}
+
+/* ---------- context bar ---------- */
+
+.ccs-context {
+  display: flex;
+  gap: var(--spectrum-spacing-200);
+  align-items: center;
+  padding: var(--spectrum-spacing-200);
+  border-radius: var(--spectrum-corner-radius-large-default);
+  background: var(--spectrum-gray-100);
+}
+
+.ccs-context-thumb {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: var(--spectrum-corner-radius-medium-default);
+  background: var(--spectrum-gray-25);
+}
+
+.ccs-context-thumb.is-empty {
+  display: grid;
+  place-items: center;
+  color: var(--spectrum-gray-600);
+}
+
+.ccs-context-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ccs-context-name {
+  margin: 0;
+  font-weight: var(--spectrum-bold-font-weight, 700);
+  color: var(--spectrum-gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- typography ---------- */
+
+.ccs-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-200);
+}
+
+.ccs-heading {
+  margin: 0;
+  font-size: var(--spectrum-font-size-200);
+  font-weight: var(--spectrum-heading-sans-serif-font-weight, 800);
+  color: var(--spectrum-gray-900);
+}
+
+.ccs-body {
+  margin: 0;
+  color: var(--spectrum-gray-800);
+}
+
+.ccs-strong {
+  margin: 0;
+  font-weight: var(--spectrum-bold-font-weight, 700);
+  color: var(--spectrum-gray-900);
+  overflow-wrap: anywhere;
+}
+
+.ccs-detail {
+  margin: 0;
+  font-size: var(--spectrum-font-size-75);
+  color: var(--spectrum-gray-700);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- layout helpers ---------- */
+
+.ccs-inline {
+  display: flex;
+  gap: var(--spectrum-spacing-100);
+  align-items: flex-start;
+}
+
+.ccs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spectrum-spacing-100);
+  align-items: center;
+}
+
+.ccs-grow {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.ccs-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.ccs-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spectrum-spacing-100);
+  padding-top: var(--spectrum-spacing-200);
+}
+
+/* ---------- cards ---------- */
+
+.ccs-card {
+  padding: var(--spectrum-spacing-300);
+  border: 1px solid var(--spectrum-gray-200);
+  border-radius: var(--spectrum-corner-radius-large-default);
+  background: var(--spectrum-background-layer-1-color);
+}
+
+.ccs-card.is-subtle {
+  background: var(--spectrum-gray-100);
+  border-color: transparent;
+}
+
+.ccs-product {
+  display: flex;
+  gap: var(--spectrum-spacing-300);
+  align-items: flex-start;
+}
+
+.ccs-product img {
+  flex: none;
+  object-fit: contain;
+  border-radius: var(--spectrum-corner-radius-medium-default);
+  background: var(--spectrum-gray-25);
+}
+
+.ccs-product-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-75);
+  min-width: 0;
+}
+
+/* ---------- inline alert (Spectrum 2 pattern) ---------- */
+
+.ccs-alert {
+  --ccs-alert-color: var(--spectrum-gray-700);
+
+  padding: var(--spectrum-spacing-200) var(--spectrum-spacing-300);
+  border: 2px solid var(--ccs-alert-color);
+  border-radius: var(--spectrum-corner-radius-large-default);
+  background: var(--spectrum-background-layer-1-color);
+}
+
+.ccs-alert.is-informative {
+  --ccs-alert-color: var(--spectrum-informative-visual-color);
+}
+
+.ccs-alert.is-positive {
+  --ccs-alert-color: var(--spectrum-positive-visual-color);
+}
+
+.ccs-alert.is-notice {
+  --ccs-alert-color: var(--spectrum-notice-visual-color);
+}
+
+.ccs-alert.is-negative {
+  --ccs-alert-color: var(--spectrum-negative-visual-color);
+}
+
+.ccs-alert-heading {
+  margin: 0 0 var(--spectrum-spacing-75);
+  font-weight: var(--spectrum-bold-font-weight, 700);
+  color: var(--spectrum-gray-900);
+}
+
+.ccs-alert-text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- empty / loading ---------- */
+
+.ccs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spectrum-spacing-200);
+  padding: var(--spectrum-spacing-500) var(--spectrum-spacing-300);
+  text-align: center;
+  border: 1px dashed var(--spectrum-gray-300);
+  border-radius: var(--spectrum-corner-radius-large-default);
+}
+
+.ccs-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--spectrum-accent-color-100, var(--spectrum-gray-100));
+  color: var(--spectrum-accent-color-900);
+}
+
+.ccs-loading {
+  display: flex;
+  gap: var(--spectrum-spacing-200);
+  align-items: center;
+  color: var(--spectrum-gray-700);
+}
+
+/* ---------- Box file tiles ---------- */
+
+.ccs-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--spectrum-spacing-200);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ccs-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-75);
+  width: 100%;
+  padding: var(--spectrum-spacing-100);
+  border: 1px solid var(--spectrum-gray-200);
+  border-radius: var(--spectrum-corner-radius-large-default);
+  background: var(--spectrum-background-layer-1-color);
+  color: inherit;
+  font: inherit;
+  font-size: var(--spectrum-font-size-75);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 130ms ease-out, box-shadow 130ms ease-out;
+}
+
+.ccs-tile:focus-visible {
+  outline: 2px solid var(--spectrum-accent-color-800);
+  outline-offset: 2px;
+}
+
+.ccs-tile.is-selected {
+  border-color: var(--spectrum-accent-color-800);
+  box-shadow: 0 0 0 1px var(--spectrum-accent-color-800);
+}
+
+.ccs-tile:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ccs-tile:hover:not(:disabled, .is-selected) {
+  border-color: var(--spectrum-gray-400);
+}
+
+.ccs-tile-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: var(--spectrum-corner-radius-medium-default);
+  background: var(--spectrum-gray-75);
+  color: var(--spectrum-gray-600);
+  overflow: hidden;
+}
+
+.ccs-tile-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ccs-tile-check {
+  position: absolute;
+  inset: 6px 6px auto auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--spectrum-white, #fff);
+  color: var(--spectrum-accent-color-900);
+}
+
+.ccs-tile-name {
+  font-weight: var(--spectrum-bold-font-weight, 700);
+  color: var(--spectrum-gray-900);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- prepare ---------- */
+
+.ccs-recipe {
+  margin: 0;
+  padding-inline-start: var(--spectrum-spacing-400);
+  color: var(--spectrum-gray-800);
+}
+
+.ccs-recipe li {
+  margin: var(--spectrum-spacing-75) 0;
+}
+
+.ccs-job {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-100);
+}
+
+.ccs-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-75);
+}
+
+.ccs-progress {
+  width: 100%;
+}
+
+/* ---------- review ---------- */
+
+.ccs-previews {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--spectrum-spacing-200);
+  align-items: start;
+}
+
+.ccs-preview {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-75);
+}
+
+.ccs-preview-missing {
+  display: grid;
+  place-items: center;
+  color: var(--spectrum-gray-600);
+}
+
+.ccs-preview img,
+.ccs-preview-missing {
+  width: 100%;
+  border-radius: var(--spectrum-corner-radius-medium-default);
+  background: var(--spectrum-gray-75);
+  object-fit: contain;
+}
+
+.ccs-preview img {
+  height: auto;
+}
+
+.ccs-preview.is-desktop .ccs-preview-missing {
+  aspect-ratio: 1200 / 896;
+}
+
+.ccs-preview.is-mobile .ccs-preview-missing {
+  aspect-ratio: 896 / 1200;
+}
+
+/* ---------- insert summary ---------- */
+
+.ccs-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--spectrum-spacing-100) var(--spectrum-spacing-300);
+  margin: 0;
+}
+
+.ccs-summary dt {
+  color: var(--spectrum-gray-700);
+}
+
+.ccs-summary dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--spectrum-gray-900);
+}
+
+.ccs-url {
+  font-size: var(--spectrum-font-size-75);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- recent jobs ---------- */
+
+.ccs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ccs-list li {
+  display: flex;
+  gap: var(--spectrum-spacing-200);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spectrum-spacing-100) 0;
+  border-bottom: 1px solid var(--spectrum-gray-200);
+}
+
+.ccs-list-text {
+  min-width: 0;
+}
+
+/* ---------- file storage picker ---------- */
+
+.ccs-providers sp-action-button {
+  gap: var(--spectrum-spacing-75);
+}
+
+.ccs-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-start: var(--spectrum-spacing-75);
+  border-radius: 50%;
+  background: var(--spectrum-positive-visual-color);
+}

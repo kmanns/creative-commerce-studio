@@ -1,0 +1,129 @@
+/* Creative Product Spotlight — Creative Commerce Studio */
+
+.creative-product-spotlight-container .creative-product-spotlight-wrapper {
+  max-width: 1264px;
+}
+
+.creative-product-spotlight {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-medium, 24px);
+  align-items: center;
+  background: var(--color-cream-200, #ede6d5);
+  overflow: hidden;
+}
+
+.creative-product-spotlight-media {
+  line-height: 0;
+}
+
+.creative-product-spotlight-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.creative-product-spotlight-content {
+  padding: 0 var(--spacing-medium, 24px) var(--spacing-big, 32px);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The block carries its own cream surface, so it keeps its own type colours in any
+   section (e.g. Section Metadata "Navy" turns headings cream; that must not apply here). */
+main .section .creative-product-spotlight .creative-product-spotlight-content h2 {
+  margin: 0 0 var(--spacing-medium, 24px);
+  color: var(--color-blue-primary, #041e42);
+  font-family: var(--type-display-font-family);
+  font-size: clamp(3.6rem, 2.4rem + 3vw, 5.6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+main .section .creative-product-spotlight .creative-product-spotlight-description p {
+  margin: 0 0 var(--spacing-small, 16px);
+  color: var(--color-blue-primary, #041e42);
+  font-size: clamp(2rem, 1.7rem + 0.6vw, 2.4rem);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.creative-product-spotlight-cta {
+  margin: var(--spacing-small, 16px) 0 0;
+}
+
+.creative-product-spotlight-cta[hidden] {
+  display: none;
+}
+
+.creative-product-spotlight.no-media .creative-product-spotlight-content {
+  padding-top: var(--spacing-big, 32px);
+}
+
+@media (min-width: 900px) {
+  .creative-product-spotlight {
+    grid-template-columns: 3fr 2fr;
+    gap: 0;
+  }
+
+  .creative-product-spotlight.no-media {
+    grid-template-columns: 1fr;
+  }
+
+  .creative-product-spotlight-content {
+    padding: var(--spacing-big, 32px) var(--spacing-xbig, 48px);
+  }
+}
+
+/* Animated presentation: one clear entrance (~1.3 s), then a stable composition.
+   The image slides in, then headline, copy and CTA rise in sequence. Only
+   transform/opacity are animated. Content is hidden only while JS has marked the
+   block as pending, so it stays visible if scripts or IntersectionObserver are
+   unavailable; reduced-motion users get no animation at all. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ccs-spot-image-in {
+    from {
+      opacity: 0;
+      transform: translateX(-56px) scale(1.04);
+    }
+  }
+
+  @keyframes ccs-spot-rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+  }
+
+  @keyframes ccs-spot-cta-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.94);
+    }
+  }
+
+  .creative-product-spotlight.animated.is-pending .creative-product-spotlight-media img,
+  .creative-product-spotlight.animated.is-pending .creative-product-spotlight-content > * {
+    opacity: 0;
+  }
+
+  .creative-product-spotlight.animated.is-visible .creative-product-spotlight-media img {
+    animation: ccs-spot-image-in 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .creative-product-spotlight.animated.is-visible .creative-product-spotlight-content > * {
+    animation: ccs-spot-rise-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: 250ms;
+  }
+
+  .creative-product-spotlight.animated.is-visible .creative-product-spotlight-content > :nth-child(2) {
+    animation-delay: 400ms;
+  }
+
+  .creative-product-spotlight.animated.is-visible .creative-product-spotlight-content > .creative-product-spotlight-cta {
+    animation-name: ccs-spot-cta-in;
+    animation-delay: 600ms;
+  }
+}
