@@ -6,6 +6,7 @@
 - Plugin: `icon.svg` for the Workspace library row and marketplace listing.
 - Plugin: delivery-neutral wording. The Review step no longer says images always go to Product Visuals, and the failure alert reads "Delivery failed".
 - Docs: what can and can't replace an AEM API credential (PRODUCTION-READINESS).
+- Docs: "Choosing a workflow" (one admin-configured workflow today) and a Roadmap section with the planned admin-curated workflow picker.
 
 ## 0.4.0 — 2026-11-13 (contest submission)
 
