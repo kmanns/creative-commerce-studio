@@ -63,6 +63,8 @@ The run-workflow MCP only accepts sign-ins from local tools or Claude's hosted c
 
 In both modes the workflow gets a 1-hour presigned App Builder Files URL to the exact Box file version (Box links aren't accepted as workflow input hosts).
 
+> **Which workflow runs?** One admin-configured workflow (`FFCPE_WORKFLOW_ID` plus its node IDs). An author-facing picker is on the roadmap. See [Choosing a workflow](../README.md#choosing-a-workflow).
+
 ## Local Firefly bridge (DEMO ONLY)
 
 Adobe allows `localhost` sign-ins for tools that run on your own computer. The bridge is such a tool: it runs on the **operator's** computer, signs in with **their** Adobe account, and runs the queued jobs. Authors use the plugin as usual; with `FFCPE_MODE=bridge` the Prepare step shows a "Demo mode" notice and whether the bridge is online.

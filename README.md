@@ -30,6 +30,7 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 - [Security](#security)
 - [Development](#development)
 - [Known limitations](#known-limitations)
+- [Roadmap](#roadmap)
 - [License](#license)
 
 ## What it does
@@ -180,6 +181,24 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 
 The block can also be authored by hand. It's a two-column key/value table with these rows: `SKU`, `Headline`, `Description`, `Desktop image`, `Mobile image`, `Image alt`, `CTA label`, `Presentation` (`static` | `animated`). See [block/creative-product-spotlight/README.md](block/creative-product-spotlight/README.md).
 
+### Choosing a workflow
+
+**Today: one admin-configured workflow.** Authors don't choose a workflow. Every run uses the published Firefly Creative Production workflow set in the backend settings (`FFCPE_WORKFLOW_ID`), together with three node IDs from that workflow:
+
+- `FFCPE_PRODUCT_NODE_ID`: the image input that receives the packshot
+- `FFCPE_DESKTOP_NODE_ID` and `FFCPE_MOBILE_NODE_ID`: the composite outputs the extension picks up
+
+To switch workflows, change those four values in `.env`, run `aio app deploy --force-deploy`, and restart the bridge if you use it. Jobs record the workflow ID they ran with (`recipe.workflowId`), so earlier results stay traceable.
+
+**Planned: an admin-curated workflow picker.**
+
+- **One new setting** will list the allowed workflows, each with a label, a short description and its three node IDs.
+- **On the Prepare step,** authors pick one from that list. With a single entry, the picker shows just its name.
+- **Each job records the chosen workflow.** The bridge and the REST API use that workflow's node IDs to start the run and match its outputs.
+- **The backend refuses** any workflow that isn't on the list.
+
+It's admin-curated on purpose. Each workflow must produce desktop and mobile composites at known nodes, and Firefly doesn't say which nodes those are. So listing every workflow in an author's Firefly account wouldn't produce usable results.
+
 ## Configuration reference
 
 All settings are App Builder action inputs, read from `backend/.env` at deploy time. Names and placeholders are in [`backend/.env.example`](backend/.env.example). After changing only `.env`, deploy with `aio app deploy --force-deploy`.
@@ -228,9 +247,16 @@ cd plugin/build && npm install && npm run build   # rebuild plugin/vendor/spectr
   - one store view per install
   - exact-SKU lookup only
   - PNG and JPEG packshots only
-  - one workflow recipe
+  - one admin-configured workflow (see [Choosing a workflow](#choosing-a-workflow))
 - **Insertion:** insert-only. The plugin doesn't read or replace existing blocks.
 - **Price:** not shown in the spotlight. The block links to the product page, where pricing uses the shopper's context.
+
+## Roadmap
+
+- **Workflow picker:** an admin-curated list of workflows that authors choose from on the Prepare step. See [Choosing a workflow](#choosing-a-workflow).
+- **Production Firefly route:** switch from the local bridge to `FFCPE_MODE=api` once a Firefly Services server-to-server credential is available. Configuration only.
+- **Product Visuals delivery:** switch to `DELIVERY_MODE=aem` once an AEM API credential is available. Configuration only.
+- **Google Drive without the restricted scope:** `drive.file` plus the Google Picker, to avoid Google's restricted-scope verification.
 
 ## License
 
