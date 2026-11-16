@@ -18,6 +18,7 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 
 - [What it does](#what-it-does)
 - [Screenshots](#screenshots)
+- [Video walkthrough](#video-walkthrough)
 - [How it works](#how-it-works)
 - [Repository layout](#repository-layout)
 - [Requirements](#requirements)
@@ -63,6 +64,10 @@ The plugin in Experience Workspace's side panel, from a real end-to-end run (Goo
     <td></td>
   </tr>
 </table>
+
+## Video walkthrough
+
+[Watch the 4:23 Creative Commerce Studio walkthrough](docs/videos/creative-commerce-studio-walkthrough.mp4).
 
 ## How it works
 
