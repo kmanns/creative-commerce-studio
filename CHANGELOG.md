@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-11-17
+
+- **Workflow picker on the Prepare step.** Authors choose from an admin-curated list (`FFCPE_WORKFLOWS`), each entry with a name, description and steps. The backend validates the list and refuses unknown keys.
+- **Per-job recipe.** Each job records its workflow and node IDs. The MCP route, the REST API, the local bridge and result matching all use the job's own workflow, and the Insert step shows which one made the images.
+- **Duplicate-run protection** is now per workflow.
+- **Backwards compatible.** Single-workflow installs (`FFCPE_WORKFLOW_ID`) keep working; the optional `FFCPE_WORKFLOW_LABEL` names that workflow.
+- **New action** `workflows-list`, which returns labels, descriptions and steps but no node IDs.
+- **Tests:** 61, including 8 new workflow tests.
+
 ## 0.4.1 — 2026-11-16
 
 - README: screenshots of all five plugin steps from a real end-to-end run (`docs/images/`).

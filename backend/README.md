@@ -63,7 +63,7 @@ The run-workflow MCP only accepts sign-ins from local tools or Claude's hosted c
 
 In both modes the workflow gets a 1-hour presigned App Builder Files URL to the exact Box file version (Box links aren't accepted as workflow input hosts).
 
-> **Which workflow runs?** One admin-configured workflow (`FFCPE_WORKFLOW_ID` plus its node IDs). An author-facing picker is on the roadmap. See [Choosing a workflow](../README.md#choosing-a-workflow).
+> **Which workflow runs?** The one the author picks on the Prepare step, from the admin-curated `FFCPE_WORKFLOWS` list. Or the single `FFCPE_WORKFLOW_ID` if no list is set. See [Choosing a workflow](../README.md#choosing-a-workflow).
 
 ## Local Firefly bridge (DEMO ONLY)
 

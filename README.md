@@ -42,7 +42,7 @@ The Workspace library plugin walks the author through five steps:
 |---|---|
 | **Product** | Exact-SKU lookup against the site's own Commerce catalog endpoint and store context. Shows name, type, stock and the product page link. |
 | **Source** | Pick **Box** or **Google Drive** and connect your own account. Browse one allowed campaign folder with thumbnails, choose a PNG or JPEG packshot, and **confirm** that it shows the product and that you may use it. |
-| **Prepare** | Runs the published Firefly Creative Production workflow on the **exact file version** you chose: background removal, then desktop and mobile composites. A progress bar shows while it runs. |
+| **Prepare** | Pick a **workflow** from the site's curated list, then run that published Firefly Creative Production workflow on the **exact file version** you chose, for example background removal and then desktop and mobile composites. A progress bar shows while it runs. |
 | **Review** | Preview both placements. Edit headline, description, CTA label and alt text. Choose a **static** or **animated** presentation. **Accept** stores the images permanently. |
 | **Insert** | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. |
 
@@ -180,7 +180,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 1. Open a page in Experience Workspace, then **Library → Creative Commerce Studio**.
 2. **Product**: enter an exact SKU and **Look up**.
 3. **Source**: choose **Box** or **Google Drive**, connect, open the folder, pick a packshot, and tick the confirmation.
-4. **Prepare**: **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.
+4. **Prepare**: choose the **workflow** if the site offers several, then **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.
 5. **Review**: check both placements, edit the copy, choose **Static** or **Animated entrance**, then **Accept and deliver**.
 6. **Insert**: **Insert into page**, then save and preview the page as usual.
 
@@ -188,21 +188,33 @@ The block can also be authored by hand. It's a two-column key/value table with t
 
 ### Choosing a workflow
 
-**Today: one admin-configured workflow.** Authors don't choose a workflow. Every run uses the published Firefly Creative Production workflow set in the backend settings (`FFCPE_WORKFLOW_ID`), together with three node IDs from that workflow:
+Authors choose the Firefly Creative Production workflow on the **Prepare** step, from a list the site admin configures. With several workflows, they appear as radio buttons, each showing its description and steps. With one, the step just shows its name.
 
-- `FFCPE_PRODUCT_NODE_ID`: the image input that receives the packshot
-- `FFCPE_DESKTOP_NODE_ID` and `FFCPE_MOBILE_NODE_ID`: the composite outputs the extension picks up
+**Configure the list** with `FFCPE_WORKFLOWS` in `.env`: a one-line JSON array where the first entry is the default. Each entry needs:
 
-To switch workflows, change those four values in `.env`, run `aio app deploy --force-deploy`, and restart the bridge if you use it. Jobs record the workflow ID they ran with (`recipe.workflowId`), so earlier results stay traceable.
+| Field | Required | Meaning |
+|---|---|---|
+| `key` | yes | Short ID: lowercase letters, digits, dashes |
+| `label` | yes | Name authors see |
+| `description`, `steps` | no | One-line description and a list of step names shown under the choice |
+| `workflowId` | yes | The published workflow's ID |
+| `productNodeId` | yes | The image input that receives the packshot |
+| `desktopNodeId`, `mobileNodeId` | yes | The composite outputs the extension picks up |
 
-**Planned: an admin-curated workflow picker.**
+```
+FFCPE_WORKFLOWS=[{"key":"spotlight","label":"Product spotlight","description":"Cutout on the brand backdrop","steps":["Remove background","Place in the desktop layout","Place in the mobile layout"],"workflowId":"<id>","productNodeId":"<node>","desktopNodeId":"<node>","mobileNodeId":"<node>"},{"key":"lifestyle","label":"Lifestyle scene","description":"Product composited into a room scene","workflowId":"<id>","productNodeId":"<node>","desktopNodeId":"<node>","mobileNodeId":"<node>"}]
+```
 
-- **One new setting** will list the allowed workflows, each with a label, a short description and its three node IDs.
-- **On the Prepare step,** authors pick one from that list. With a single entry, the picker shows just its name.
-- **Each job records the chosen workflow.** The bridge and the REST API use that workflow's node IDs to start the run and match its outputs.
-- **The backend refuses** any workflow that isn't on the list.
+Then run `aio app deploy --force-deploy`, and restart the bridge if you use it. A configuration mistake, such as bad JSON, a duplicate key or a missing node ID, shows as a clear error that names the entry.
 
-It's admin-curated on purpose. Each workflow must produce desktop and mobile composites at known nodes, and Firefly doesn't say which nodes those are. So listing every workflow in an author's Firefly account wouldn't produce usable results.
+**Single workflow:** leave `FFCPE_WORKFLOWS` empty and set `FFCPE_WORKFLOW_ID` with the three `FFCPE_*_NODE_ID` values. `FFCPE_WORKFLOW_LABEL` is optional and sets the name authors see. Existing installs keep working unchanged.
+
+How it behaves:
+
+- **Each job records its workflow** (key, name, workflow and node IDs). Polling, the local bridge and result matching all use that job's workflow, even if the list changes later. The Insert step shows which workflow made the images.
+- **Changing the choice after a run** marks that run as belonging to the other workflow; **Run again** starts one for the new choice. Duplicate-run protection is per workflow.
+- **The backend refuses any workflow key that isn't on the list,** before anything is downloaded. The plugin never sees node IDs.
+- **The list is curated on purpose.** Each workflow must produce desktop and mobile composites at known nodes, and Firefly doesn't say which nodes those are, so authors can't pick arbitrary workflows from their Firefly account.
 
 ## Configuration reference
 
@@ -217,7 +229,8 @@ All settings are App Builder action inputs, read from `backend/.env` at deploy t
 | `BOX_CLIENT_ID`, `BOX_CLIENT_SECRET`, `BOX_REDIRECT_URI`, `BOX_ALLOWED_FOLDER_ID` | for Box | Box OAuth app and campaign folder |
 | `GDRIVE_CLIENT_ID`, `GDRIVE_CLIENT_SECRET`, `GDRIVE_REDIRECT_URI`, `GDRIVE_ALLOWED_FOLDER_ID` | for Drive | Google OAuth client and campaign folder |
 | `FFCPE_MODE` | yes | `bridge` (demo), `api` (production) or `mcp` (hosted MCP sign-in, refused by Adobe today) |
-| `FFCPE_WORKFLOW_ID`, `FFCPE_PRODUCT_NODE_ID`, `FFCPE_DESKTOP_NODE_ID`, `FFCPE_MOBILE_NODE_ID` | yes | Published workflow and its node IDs. Outputs are matched by node ID |
+| `FFCPE_WORKFLOWS` | yes, or the single-workflow settings | One-line JSON list of workflows authors can choose: key, label, description, steps, workflow and node IDs. See [Choosing a workflow](#choosing-a-workflow) |
+| `FFCPE_WORKFLOW_ID`, `FFCPE_PRODUCT_NODE_ID`, `FFCPE_DESKTOP_NODE_ID`, `FFCPE_MOBILE_NODE_ID`, `FFCPE_WORKFLOW_LABEL` | single workflow | One published workflow, used when `FFCPE_WORKFLOWS` is empty. Outputs are matched by node ID |
 | `BRIDGE_TOKEN`, `CCS_BACKEND_URL` | bridge mode | Shared secret between the backend and the local bridge; backend URL for the bridge |
 | `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID`, `FFCPE_IMS_USER_ID`, `FFCPE_SCOPES`, `FFCPE_API_BASE`, `FFCPE_EXECUTE_TEMPLATE` | api mode | Server-to-server credential and REST settings |
 | `DELIVERY_MODE` | no | `aem` (Product Visuals) or `public` (App Builder public storage); the default depends on whether `AEM_AUTHOR_URL` is set |
@@ -252,13 +265,12 @@ cd plugin/build && npm install && npm run build   # rebuild plugin/vendor/spectr
   - one store view per install
   - exact-SKU lookup only
   - PNG and JPEG packshots only
-  - one admin-configured workflow (see [Choosing a workflow](#choosing-a-workflow))
+  - workflows limited to an admin-curated list (see [Choosing a workflow](#choosing-a-workflow))
 - **Insertion:** insert-only. The plugin doesn't read or replace existing blocks.
 - **Price:** not shown in the spotlight. The block links to the product page, where pricing uses the shopper's context.
 
 ## Roadmap
 
-- **Workflow picker:** an admin-curated list of workflows that authors choose from on the Prepare step. See [Choosing a workflow](#choosing-a-workflow).
 - **Production Firefly route:** switch from the local bridge to `FFCPE_MODE=api` once a Firefly Services server-to-server credential is available. Configuration only.
 - **Product Visuals delivery:** switch to `DELIVERY_MODE=aem` once an AEM API credential is available. Configuration only.
 - **Google Drive without the restricted scope:** `drive.file` plus the Google Picker, to avoid Google's restricted-scope verification.
