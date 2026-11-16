@@ -17,6 +17,7 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 ## Contents
 
 - [What it does](#what-it-does)
+- [Screenshots](#screenshots)
 - [How it works](#how-it-works)
 - [Repository layout](#repository-layout)
 - [Requirements](#requirements)
@@ -44,6 +45,23 @@ The Workspace library plugin walks the author through five steps:
 | **Insert** | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. |
 
 On the storefront the block renders the responsive image, which is never cropped, plus the editable HTML copy and a native CTA. The CTA's product link is **resolved from Commerce at runtime**. If the SKU no longer exists, the CTA is hidden instead of linking to a missing product. The optional animated presentation is a one-time entrance, about 1.3 s, and is disabled for visitors who prefer reduced motion.
+
+## Screenshots
+
+The plugin in Experience Workspace's side panel, from a real end-to-end run (Google Drive → Firefly Creative Production → insert).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/01-product.jpg" width="200" alt="Product step: exact-SKU lookup shows the product, stock status and the product page link"><br><sub><b>1. Product</b>: exact-SKU lookup</sub></td>
+    <td align="center"><img src="docs/images/02-source.jpg" width="200" alt="Source step: Box or Google Drive picker, campaign folder thumbnails, selected packshot and authorization confirmation"><br><sub><b>2. Source</b>: Box or Google Drive, confirm the file</sub></td>
+    <td align="center"><img src="docs/images/03-prepare.jpg" width="200" alt="Prepare step: workflow steps, demo-mode notice, local Firefly bridge online, job delivered"><br><sub><b>3. Prepare</b>: Firefly Creative Production run</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/04-review.jpg" width="200" alt="Review step: desktop 1200x896 and mobile 896x1200 placements with editable headline, description and CTA"><br><sub><b>4. Review</b>: placements and copy</sub></td>
+    <td align="center"><img src="docs/images/05-insert.jpg" width="200" alt="Insert step: summary of SKU, copy, presentation and permanent image URLs with the Insert into page button"><br><sub><b>5. Insert</b>: block at the cursor</sub></td>
+    <td></td>
+  </tr>
+</table>
 
 ## How it works
 
@@ -148,7 +166,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
      "creative-commerce-studio": { "backend-url": "https://<namespace>.adobeioruntime.net/api/v1/web/creative-commerce-studio" }
      ```
 6. **Allow the plugin's origins** in the backend's `ALLOWED_ORIGINS`: `https://da.live`, `https://<branch>--<site>--<org>.preview.da.live` (Workspace serves plugins through this proxy), and your `.aem.page` and `.aem.live` hosts. Redeploy.
-7. **Register the plugin**: Workspace site config `https://da.live/config#/<org>/<site>/` → **library** sheet, add a row with title `Creative Commerce Studio` and path `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/creative-commerce-studio.html`.
+7. **Register the plugin**: Workspace site config `https://da.live/config#/<org>/<site>/` → **library** sheet, add a row with title `Creative Commerce Studio` and path `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/creative-commerce-studio.html`. For the row's **image** column you can use the bundled icon: `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/icon.svg`.
 8. **Firefly (demo mode)**: on the operator's computer, in `backend/`, run `npm run bridge:login` once, then keep `npm run bridge` running during use. For production, use `FFCPE_MODE=api` with the server-to-server credential instead.
 
 ## Using it

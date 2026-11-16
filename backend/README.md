@@ -125,7 +125,7 @@ Site config `https://da.live/config#/<org>/<site>/` → **library** sheet, add a
 
 | title | description | image | path | ref |
 |-------|-------------|-------|------|-----|
-| Creative Commerce Studio | Box packshot → FFCPE → shoppable spotlight | *(optional icon URL)* | `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/creative-commerce-studio.html` | |
+| Creative Commerce Studio | Box or Google Drive packshot → FFCPE → shoppable spotlight | `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/icon.svg` | `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/creative-commerce-studio.html` | |
 
 For local development, use `ref=local`. Workspace then loads the plugin from `http://localhost:3000`.
 

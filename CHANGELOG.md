@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 — 2026-11-16
+
+- README: screenshots of all five plugin steps from a real end-to-end run (`docs/images/`).
+- Plugin: `icon.svg` for the Workspace library row and marketplace listing.
+- Plugin: delivery-neutral wording. The Review step no longer says images always go to Product Visuals, and the failure alert reads "Delivery failed".
+- Docs: what can and can't replace an AEM API credential (PRODUCTION-READINESS).
+
 ## 0.4.0 — 2026-11-13 (contest submission)
 
 First standalone release. Tested end to end in a reference install: SKU, then Box or Google Drive, then Firefly Creative Production through the local bridge, then review, delivery to App Builder public storage, and insertion into an Experience Workspace page.
