@@ -238,7 +238,12 @@ Authors only pick the product, the photo and the look. The scene images stay hid
 - **Links:** every run gets fresh 1-hour links to them.
 - **Each run is one product with one look.** Don't put several looks' images into one entry: the workflow could pair them up in unintended combinations.
 
-**Upload the list and the images** from the backend folder on your computer. `aio app use` must have been run there, because the command reads that workspace's `AIO_runtime_*` values from `.env`.
+**Upload the list and the images** from the backend folder on your computer, the same folder you deploy from. The command uploads **through the deployed backend**: the backend hands out 10-minute upload links, so your computer needs no storage credentials. It needs `CCS_BACKEND_URL` plus a token in that folder's `.env`:
+
+- **Bridge mode:** the existing `BRIDGE_TOKEN` works.
+- **Otherwise:** set `ADMIN_TOKEN`, 32+ random characters (for example from `openssl rand -hex 32`), and redeploy.
+
+Without those settings, or with `--direct`, it writes straight to App Builder storage using the `AIO_runtime_*` values that `aio app use` writes.
 
 1. Put each image at its `file` path under `backend/looks/`, for example `backend/looks/workshop/workshop-desktop-mask.png`. Give every file a unique name, such as the look's name followed by its part, so they can't be mixed up in Firefly either. Images in that folder aren't committed.
 2. `npm run workflows:check` validates the list and every image and uploads nothing. It checks that:
@@ -275,7 +280,8 @@ All settings are App Builder action inputs, read from `backend/.env` at deploy t
 | `workflows.json` (uploaded with `npm run workflows:upload`) | yes, or one of the next two | The workflows authors can choose, with any scene images. Not an `.env` setting; changes need no redeploy. See [Choosing a workflow](#choosing-a-workflow) |
 | `FFCPE_WORKFLOWS` | no | The same list as a one-line JSON array in `.env`; when set, it takes precedence over the uploaded `workflows.json` |
 | `FFCPE_WORKFLOW_ID`, `FFCPE_PRODUCT_NODE_ID`, `FFCPE_DESKTOP_NODE_ID`, `FFCPE_MOBILE_NODE_ID`, `FFCPE_WORKFLOW_LABEL` | single workflow | One published workflow, used when there is no list. Outputs are matched by node ID |
-| `BRIDGE_TOKEN`, `CCS_BACKEND_URL` | bridge mode | Shared secret between the backend and the local bridge; backend URL for the bridge |
+| `BRIDGE_TOKEN`, `CCS_BACKEND_URL` | bridge mode | Shared secret between the backend and the local bridge; backend URL for the bridge and the upload command |
+| `ADMIN_TOKEN` | no | Secret (32+ characters) for `npm run workflows:upload` outside bridge mode |
 | `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID`, `FFCPE_IMS_USER_ID`, `FFCPE_SCOPES`, `FFCPE_API_BASE`, `FFCPE_EXECUTE_TEMPLATE` | api mode | Server-to-server credential and REST settings |
 | `DELIVERY_MODE` | no | `aem` (Product Visuals) or `public` (App Builder public storage); the default depends on whether `AEM_AUTHOR_URL` is set |
 | `AEM_AUTHOR_URL`, `AEM_DELIVERY_URL`, `AEM_CLIENT_ID`, `AEM_CLIENT_SECRET`, `AEM_SCOPES`, `AEM_TARGET_FOLDER` | aem delivery | AEM Assets credential and target folder |
