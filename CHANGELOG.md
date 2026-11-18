@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2 — 2026-11-18
+
+- **`npm run workflows:upload` goes through the deployed backend.** The new `workflows-upload-urls` action returns 10-minute write links, and only for the list and `looks/` images. It's protected by `ADMIN_TOKEN`, or by `BRIDGE_TOKEN` in bridge mode. The admin's computer no longer needs storage credentials, which could be refused with `ERROR_BAD_CREDENTIALS`. `--direct` keeps the old route.
+- **`ADMIN_TOKEN` setting.** 83 tests.
+
 ## 0.6.1 — 2026-11-18
 
 - **Unique scene image names** in the example and docs: `<look>-<channel>-<part>`, for example `looks/workshop/workshop-desktop-background.jpg`.

@@ -171,6 +171,8 @@ For local development, use `ref=local`. Workspace then loads the plugin from `ht
 | "Adobe's Firefly sign-in did not accept this app's registration" | The MCP sign-in server refused dynamic registration for this redirect URI. Use `api` mode, or check `FIREFLY_REDIRECT_URI` |
 | Connect Firefly window closes but stays disconnected | Check `aio app logs` for `firefly-auth-callback`; the Adobe account may lack access to the workflow |
 | "… is missing scene images in backend storage" | Put the images under `looks/` at the paths in `workflows.json` and run `npm run workflows:upload` |
+| `workflows:upload`: "unauthorized access to the storage service" | Direct upload was refused. Set `CCS_BACKEND_URL` and `BRIDGE_TOKEN` (bridge mode) or `ADMIN_TOKEN` in `.env`, deploy, and upload again, which then goes through the backend |
+| `workflows:upload`: "The backend refused the upload … HTTP 404" | The backend predates the upload action: run `aio app deploy --force-deploy` first |
 | "The local Firefly bridge is out of date" | Update the backend folder and restart `npm run bridge`; older bridges only send the product photo |
 | `ffcpe-error … rejected the request` | Wrong workflow ID or node ID, the workflow isn't published, or (api mode) the request body doesn't match |
 | "desktop/mobile composites were not found (output nodes: …)" | The listed node IDs are what came back; set `FFCPE_DESKTOP_NODE_ID` / `FFCPE_MOBILE_NODE_ID` to the composite nodes |
