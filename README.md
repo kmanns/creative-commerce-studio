@@ -121,6 +121,11 @@ These are the accounts and roles needed to run the extension as it is today, in 
 
 The full list of settings, including the advanced ones, is in [Configuration reference](#configuration-reference).
 
+**After installing,** open the plugin. The **Setup check** at the top of the Product step confirms each part:
+
+- **What it checks:** Workspace, Commerce catalog, backend and sign-in, encryption key, file sources, Firefly mode and bridge, workflows and their scene images, and delivery.
+- **What it shows:** each gap with who fixes it (**Site admin** or **You**) and a link to the fix. It reports only whether each part is set up, never secret values.
+
 ## What it does
 
 The Workspace library plugin walks the author through five steps:
@@ -236,7 +241,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 
 ## Using it
 
-1. Open a page in Experience Workspace, then **Library → Creative Commerce Studio**.
+1. Open a page in Experience Workspace, then **Library → Creative Commerce Studio**. If the **Setup check** at the top shows anything to fix, follow its links first.
 2. **Product**: enter an exact SKU and **Look up**.
 3. **Source**: choose **Box** or **Google Drive**, connect, open the folder, pick a packshot, and tick the confirmation.
 4. **Prepare**: choose the **workflow** (for example a Campaign Look) if the site offers several, then **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.

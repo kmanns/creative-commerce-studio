@@ -5,6 +5,11 @@
 - **New banner from the Insert step.** **New banner** starts over at Product, and **Another for <SKU>** keeps the product and goes to Source. Connections, the open folder and the workflow choice are kept, and the finished banner stays in Recent jobs. If the banner hasn't been inserted yet, the author is asked first. After inserting, the button reads **Insert again**.
 - **README: "Before you start" comes first.** It covers a five-point requirements summary, the application and access requirements, and every value, credential and secret to fill in, with where to get each.
 - Changing the product resets the image alt text to the new product's name.
+- **Setup check** at the top of the Product step.
+  - **What it checks:** Workspace, Commerce catalog, backend and sign-in, encryption key, Box and Drive, Firefly mode and bridge, workflows and their scene images, and delivery.
+  - **What it shows:** each gap marked **Site admin** or **You**, with a link to the fix. It opens on its own when something blocks a run.
+  - **New `setup-status` action:** it reports states only, never secret values, node IDs or file paths. Older backends fall back to the existing status calls.
+  - **Tests:** 86.
 
 ## 0.6.2 — 2026-11-18
 
