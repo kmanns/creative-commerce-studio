@@ -3,3 +3,8 @@
 node_modules/
 dist/
 coverage/
+
+# Your workflow list (copy workflows.example.json) and scene images are site-specific.
+workflows.json
+looks/**
+!looks/README.md

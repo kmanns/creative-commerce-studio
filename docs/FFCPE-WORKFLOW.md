@@ -24,10 +24,21 @@ Prefer two simple templates over a multi-artboard file until you have confirmed 
    - `FFCPE_MODE=api`: add an **OAuth Server-to-Server** credential for the Firefly Services / Creative Production API (`FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID`). The documented scopes are `openid,AdobeID,session,additional_info,read_organizations,firefly_api,ff_apis`. The REST contract is published at `https://run-workflow.adobe.io/openapi.json`.
 5. Run one small authorized job (it may be billable) and confirm the plugin reaches **ready-for-review**.
 
-Optional `FFCPE_EXECUTE_TEMPLATE` (api mode) placeholders: `{{workflowId}}`, `{{productNodeId}}`, `{{sourceUrl}}`, `{{sku}}`, `{{jobId}}`, `{{productName}}`, `{{sourceName}}`. Values are JSON-escaped. An unknown placeholder fails the job before anything is sent.
+Optional `FFCPE_EXECUTE_TEMPLATE` (api mode) placeholders: `{{workflowId}}`, `{{productNodeId}}`, `{{sourceUrl}}`, `{{sku}}`, `{{jobId}}`, `{{productName}}`, `{{sourceName}}`. Values are JSON-escaped. An unknown placeholder fails the job before anything is sent. The template only supports workflows whose only input is the product photo; leave it unset for workflows with scene images.
+
+## Workflows with extra image inputs (for example Campaign Looks)
+
+A workflow can take more inputs than the product photo, such as a scene background and a placement mask per channel. The extension supplies them from private backend storage (`inputs` in `workflows.json`; see "Choosing a workflow" in the README).
+
+- **Publish with all inputs connected,** and note every input's node ID. Don't rely on the workflow keeping defaults for inputs the extension sends.
+- **Choices such as a "look" are made in the extension, not the workflow.** Make one `workflows.json` entry per look, each with the same `workflowId` and its own scene images. The workflow has no look parameter.
+- **One product and one set of scene images per run.** Several images in one input can produce unintended combinations instead of matched pairs.
+- **Masks are opaque grayscale PNGs** at exactly their background's size: white marks the placement region, black protects the rest.
+- **The final composites must be their own nodes.** The extension picks them by node ID from a response that also contains the source images, masks and intermediate cutouts.
 
 ## Tested versions
 
+- 2026-11-17: A five-input "Campaign Looks" workflow: product photo plus a desktop and a mobile background and placement mask, then background removal and Precise composites at 1200×896 and 896×1200. It was exercised in Firefly with matched look images; transient composite HTTP 500s happened and per-product retries succeeded.
 - 2026-11-12: A three-step product-spotlight workflow (remove background → desktop composite → mobile composite) ran successfully through the run-workflow MCP (`run_workflow_submit` / `run_workflow_get_status`) with one product URL override. It returned a PNG cutout plus desktop (1200×896) and mobile (896×1200) JPEG composites as signed links valid for about 1 hour. Output names came from the background image, so match by node ID. The backend's own sign-in has not yet been run live.
 
 ## Sharing this workflow
