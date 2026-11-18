@@ -196,7 +196,7 @@ The secrets (Box, Google and Adobe credentials, and the encryption key) exist on
 ## Production readiness
 
 > [!IMPORTANT]
-> The code for the production path is already built and tested (`FFCPE_MODE=api`, `DELIVERY_MODE=aem`). What's missing is **access**. The table lists the Adobe Developer Console APIs, credentials and roles each service needs. Full checklist: **[docs/PRODUCTION-READINESS.md](docs/PRODUCTION-READINESS.md)**.
+> The code for the production path is already built (`FFCPE_MODE=api`, `DELIVERY_MODE=aem`) and covered by automated tests, but **neither route has run against the live service yet**, because no Firefly Services or AEM API credential was available. What's missing is **access**, then a first supervised run to confirm the live request and response details. The table lists the Adobe Developer Console APIs, credentials and roles each service needs. Full checklist: **[docs/PRODUCTION-READINESS.md](docs/PRODUCTION-READINESS.md)**.
 
 | Service | Developer Console API / credential | Entitlement & roles | Approvals & other work |
 |---|---|---|---|
@@ -384,8 +384,8 @@ cd plugin/build && npm install && npm run build   # rebuild plugin/vendor/spectr
 
 ## Roadmap
 
-- **Production Firefly route:** switch from the local bridge to `FFCPE_MODE=api` once a Firefly Services server-to-server credential is available. Configuration only.
-- **Product Visuals delivery:** switch to `DELIVERY_MODE=aem` once an AEM API credential is available. Configuration only.
+- **Production Firefly route:** switch from the local bridge to `FFCPE_MODE=api` once a Firefly Services server-to-server credential is available. That's a configuration change, then a first live run to confirm it: the route is built and covered by automated tests but hasn't run against the live API.
+- **Product Visuals delivery:** switch to `DELIVERY_MODE=aem` once an AEM API credential is available. That's a configuration change, then a first live delivery to confirm it: it's built and covered by automated tests but hasn't run against a live AEM environment.
 - **Google Drive without the restricted scope:** `drive.file` plus the Google Picker, to avoid Google's restricted-scope verification.
 
 ## License
