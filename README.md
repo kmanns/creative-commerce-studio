@@ -153,7 +153,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 
 1. **Create the App Builder project**: Developer Console → *Create project from template* → **App Builder**. Note the workspace's **Runtime namespace**; your backend URL will be `https://<namespace>.adobeioruntime.net/api/v1/web/creative-commerce-studio`.
 2. **Set up a source.** For **Box**: an OAuth 2.0 app with redirect `<backend>/box-auth-callback` and a campaign folder ID. For **Google Drive**: an OAuth client (Web) with redirect `<backend>/gdrive-auth-callback`, the Drive API enabled, test users, and a folder ID. Set up one or both.
-3. **Build and publish the Firefly workflow** ([docs/FFCPE-WORKFLOW.md](docs/FFCPE-WORKFLOW.md)), and note the workflow ID and the product, desktop and mobile node IDs.
+3. **Build and publish the Firefly workflow** ([docs/FFCPE-WORKFLOW.md](docs/FFCPE-WORKFLOW.md)), and note the workflow ID and the product, desktop and mobile node IDs. Copy `backend/workflows.example.json` to `backend/workflows.json` and fill them in, along with any scene images the workflow needs (see [Choosing a workflow](#choosing-a-workflow)).
 4. **Configure and deploy the backend:**
    ```bash
    cd backend
@@ -163,6 +163,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
    # append the variables from .env.example to the .env that aio created, and fill them in
    npm install && npm test
    aio app deploy --force-deploy
+   npm run workflows:upload      # the workflow list and any scene images
    ```
 5. **Add the block and the plugin to your site repo**:
    - copy `block/creative-product-spotlight/` to `blocks/creative-product-spotlight/`
@@ -180,7 +181,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 1. Open a page in Experience Workspace, then **Library → Creative Commerce Studio**.
 2. **Product**: enter an exact SKU and **Look up**.
 3. **Source**: choose **Box** or **Google Drive**, connect, open the folder, pick a packshot, and tick the confirmation.
-4. **Prepare**: choose the **workflow** if the site offers several, then **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.
+4. **Prepare**: choose the **workflow** (for example a Campaign Look) if the site offers several, then **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.
 5. **Review**: check both placements, edit the copy, choose **Static** or **Animated entrance**, then **Accept and deliver**.
 6. **Insert**: **Insert into page**, then save and preview the page as usual.
 
@@ -190,30 +191,72 @@ The block can also be authored by hand. It's a two-column key/value table with t
 
 Authors choose the Firefly Creative Production workflow on the **Prepare** step, from a list the site admin configures. With several workflows, they appear as radio buttons, each showing its description and steps. With one, the step just shows its name.
 
-**Configure the list** with `FFCPE_WORKFLOWS` in `.env`: a one-line JSON array where the first entry is the default. Each entry needs:
+#### The workflow list
+
+Keep the list in `backend/workflows.json`, a JSON array where the first entry is the default. Start from `backend/workflows.example.json`. Upload it with `npm run workflows:upload` (see below). Changes apply to the next run, with no redeploy. Each entry is one choice authors see:
 
 | Field | Required | Meaning |
 |---|---|---|
 | `key` | yes | Short ID: lowercase letters, digits, dashes |
 | `label` | yes | Name authors see |
 | `description`, `steps` | no | One-line description and a list of step names shown under the choice |
-| `workflowId` | yes | The published workflow's ID |
-| `productNodeId` | yes | The image input that receives the packshot |
-| `desktopNodeId`, `mobileNodeId` | yes | The composite outputs the extension picks up |
+| `workflowId` | yes | The **published** workflow's execution ID, not the editable Builder source's ID |
+| `productNodeId` | yes | The image input that receives the author's product photo |
+| `desktopNodeId`, `mobileNodeId` | yes | The final desktop and mobile composite nodes. Outputs are picked by these node IDs, never by order or file name |
+| `inputs` | no | Fixed images sent with every run of this entry, such as a scene background and its placement mask. Each has `nodeId`, `file` (a path under `looks/`), an optional `role` (`desktop-background`, `desktop-mask`, `mobile-background`, `mobile-mask` or `other`) and optional `width` and `height` |
 
+Where the list comes from, first match wins:
+
+1. `FFCPE_WORKFLOWS` in `.env`, a one-line JSON array in the same format. It needs `aio app deploy --force-deploy` after each change, and the upload command warns if it's set, because it hides the uploaded list.
+2. The uploaded `workflows.json`.
+3. A single workflow from `FFCPE_WORKFLOW_ID` and the three `FFCPE_*_NODE_ID` values, with an optional `FFCPE_WORKFLOW_LABEL`. Existing installs keep working unchanged.
+
+#### Workflows with scene images (for example Campaign Looks)
+
+Some workflows need more than the product photo. A "Campaign Looks" workflow, for instance, composites the product into a pre-approved scene, and it needs that scene's desktop and mobile **background** plus a **placement mask** for each. In the list, make **one entry per look**. Every entry uses the same `workflowId` and node IDs, and its own four `inputs`:
+
+```json
+{
+  "key": "look-workshop",
+  "label": "Campaign Look: Workshop",
+  "workflowId": "<published-workflow-id>",
+  "productNodeId": "<product-photo-input-node>",
+  "desktopNodeId": "<desktop-composite-node>",
+  "mobileNodeId": "<mobile-composite-node>",
+  "inputs": [
+    { "nodeId": "<desktop-background-input-node>", "file": "looks/workshop/desktop-background.jpg", "role": "desktop-background" },
+    { "nodeId": "<desktop-mask-input-node>", "file": "looks/workshop/desktop-mask.png", "role": "desktop-mask" },
+    { "nodeId": "<mobile-background-input-node>", "file": "looks/workshop/mobile-background.jpg", "role": "mobile-background" },
+    { "nodeId": "<mobile-mask-input-node>", "file": "looks/workshop/mobile-mask.png", "role": "mobile-mask" }
+  ]
+}
 ```
-FFCPE_WORKFLOWS=[{"key":"spotlight","label":"Product spotlight","description":"Cutout on the brand backdrop","steps":["Remove background","Place in the desktop layout","Place in the mobile layout"],"workflowId":"<id>","productNodeId":"<node>","desktopNodeId":"<node>","mobileNodeId":"<node>"},{"key":"lifestyle","label":"Lifestyle scene","description":"Product composited into a room scene","workflowId":"<id>","productNodeId":"<node>","desktopNodeId":"<node>","mobileNodeId":"<node>"}]
-```
 
-Then run `aio app deploy --force-deploy`, and restart the bridge if you use it. A configuration mistake, such as bad JSON, a duplicate key or a missing node ID, shows as a clear error that names the entry.
+Authors only pick the product, the photo and the look. The scene images stay hidden:
 
-**Single workflow:** leave `FFCPE_WORKFLOWS` empty and set `FFCPE_WORKFLOW_ID` with the three `FFCPE_*_NODE_ID` values. `FFCPE_WORKFLOW_LABEL` is optional and sets the name authors see. Existing installs keep working unchanged.
+- **Storage:** they're kept in the backend's **private** App Builder storage, never under `public/`.
+- **Links:** every run gets fresh 1-hour links to them.
+- **Each run is one product with one look.** Don't put several looks' images into one entry: the workflow could pair them up in unintended combinations.
 
-How it behaves:
+**Upload the list and the images** from the backend folder on your computer. `aio app use` must have been run there, because the command reads that workspace's `AIO_runtime_*` values from `.env`.
 
-- **Each job records its workflow** (key, name, workflow and node IDs). Polling, the local bridge and result matching all use that job's workflow, even if the list changes later. The Insert step shows which workflow made the images.
+1. Put each image at its `file` path under `backend/looks/`, for example `backend/looks/workshop/desktop-mask.png`. Images in that folder aren't committed.
+2. `npm run workflows:check` validates the list and every image and uploads nothing. It checks that:
+   - every file is present and really is a PNG or JPEG
+   - masks are PNG
+   - each mask is exactly the size of its channel's background
+   - any `width` or `height` you gave matches the file
+3. `npm run workflows:upload` runs the same checks, then uploads the images, and the list last.
+
+The backend repeats those checks **before every run**, so a missing or wrong image stops the run with a clear message before anything reaches Firefly. Scene images for the Campaign Looks contract are 1200 × 896 for desktop and 896 × 1200 for mobile, and the masks are opaque grayscale PNGs: white marks where the product goes, black protects the rest.
+
+#### How runs behave
+
+- **Each job records its workflow:** key, name, workflow ID, node IDs and scene image paths. Polling, the local bridge and result matching all use that job's workflow, even if the list changes later. The Insert step shows which workflow made the images.
+- **Desktop and mobile succeed or fail on their own.** If only one composite comes back, it's kept and shown on the Prepare step next to the channel that failed, with the reason. Accepting needs both, so the author runs again for a new pair. Firefly runs aren't idempotent: a retry is a new, possibly billable, run.
 - **Changing the choice after a run** marks that run as belonging to the other workflow; **Run again** starts one for the new choice. Duplicate-run protection is per workflow.
-- **The backend refuses any workflow key that isn't on the list,** before anything is downloaded. The plugin never sees node IDs.
+- **The backend refuses any workflow key that isn't on the list,** before anything is downloaded. The plugin never sees node IDs or file paths.
+- **The local bridge must be up to date for scene images.** A bridge from before scene images were supported only sends the product photo. Those runs stop with "The local Firefly bridge is out of date". Update the backend folder and restart `npm run bridge`.
 - **The list is curated on purpose.** Each workflow must produce desktop and mobile composites at known nodes, and Firefly doesn't say which nodes those are, so authors can't pick arbitrary workflows from their Firefly account.
 
 ## Configuration reference
@@ -229,8 +272,9 @@ All settings are App Builder action inputs, read from `backend/.env` at deploy t
 | `BOX_CLIENT_ID`, `BOX_CLIENT_SECRET`, `BOX_REDIRECT_URI`, `BOX_ALLOWED_FOLDER_ID` | for Box | Box OAuth app and campaign folder |
 | `GDRIVE_CLIENT_ID`, `GDRIVE_CLIENT_SECRET`, `GDRIVE_REDIRECT_URI`, `GDRIVE_ALLOWED_FOLDER_ID` | for Drive | Google OAuth client and campaign folder |
 | `FFCPE_MODE` | yes | `bridge` (demo), `api` (production) or `mcp` (hosted MCP sign-in, refused by Adobe today) |
-| `FFCPE_WORKFLOWS` | yes, or the single-workflow settings | One-line JSON list of workflows authors can choose: key, label, description, steps, workflow and node IDs. See [Choosing a workflow](#choosing-a-workflow) |
-| `FFCPE_WORKFLOW_ID`, `FFCPE_PRODUCT_NODE_ID`, `FFCPE_DESKTOP_NODE_ID`, `FFCPE_MOBILE_NODE_ID`, `FFCPE_WORKFLOW_LABEL` | single workflow | One published workflow, used when `FFCPE_WORKFLOWS` is empty. Outputs are matched by node ID |
+| `workflows.json` (uploaded with `npm run workflows:upload`) | yes, or one of the next two | The workflows authors can choose, with any scene images. Not an `.env` setting; changes need no redeploy. See [Choosing a workflow](#choosing-a-workflow) |
+| `FFCPE_WORKFLOWS` | no | The same list as a one-line JSON array in `.env`; when set, it takes precedence over the uploaded `workflows.json` |
+| `FFCPE_WORKFLOW_ID`, `FFCPE_PRODUCT_NODE_ID`, `FFCPE_DESKTOP_NODE_ID`, `FFCPE_MOBILE_NODE_ID`, `FFCPE_WORKFLOW_LABEL` | single workflow | One published workflow, used when there is no list. Outputs are matched by node ID |
 | `BRIDGE_TOKEN`, `CCS_BACKEND_URL` | bridge mode | Shared secret between the backend and the local bridge; backend URL for the bridge |
 | `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID`, `FFCPE_IMS_USER_ID`, `FFCPE_SCOPES`, `FFCPE_API_BASE`, `FFCPE_EXECUTE_TEMPLATE` | api mode | Server-to-server credential and REST settings |
 | `DELIVERY_MODE` | no | `aem` (Product Visuals) or `public` (App Builder public storage); the default depends on whether `AEM_AUTHOR_URL` is set |
@@ -265,7 +309,7 @@ cd plugin/build && npm install && npm run build   # rebuild plugin/vendor/spectr
   - one store view per install
   - exact-SKU lookup only
   - PNG and JPEG packshots only
-  - workflows limited to an admin-curated list (see [Choosing a workflow](#choosing-a-workflow))
+  - workflows limited to an admin-curated list (see [Choosing a workflow](#choosing-a-workflow)), one product and one look per run
 - **Insertion:** insert-only. The plugin doesn't read or replace existing blocks.
 - **Price:** not shown in the spotlight. The block links to the product page, where pricing uses the shopper's context.
 

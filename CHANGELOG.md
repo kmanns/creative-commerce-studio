@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 — 2026-11-18
+
+- **Workflows with scene images** (for example Campaign Looks). A workflow entry can list fixed `inputs`, such as backgrounds and placement masks, that the backend sends with every run from private App Builder storage. Each look is its own entry in the picker.
+- **`workflows.json` plus `npm run workflows:upload` / `workflows:check`.** These validate the list and every scene image, then upload them, with no redeploy needed. `FFCPE_WORKFLOWS` still works and takes precedence.
+- **Scene image checks before every run:** files present, PNG or JPEG, masks PNG, mask size equal to its background's.
+- **Partial results.** Desktop and mobile succeed or fail on their own. The image that worked is kept and shown next to the failed channel's reason.
+- **Output matching** also reads node IDs from the enclosing output (`outputs[].node_id` with a nested `content` link).
+- **REST request body** follows the published workflow's generated API request: top-level `inputs`, `content: [{ sourceUrl, name }]`.
+- **Local bridge:** sends every run input and announces it. Runs with scene images refuse older bridges with a clear message.
+- **Tests:** 76.
+
 ## 0.5.0 — 2026-11-17
 
 - **Workflow picker on the Prepare step.** Authors choose from an admin-curated list (`FFCPE_WORKFLOWS`), each entry with a name, description and steps. The backend validates the list and refuses unknown keys.

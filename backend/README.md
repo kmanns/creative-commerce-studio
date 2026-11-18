@@ -59,11 +59,11 @@ Build and publish the workflow first ([docs/FFCPE-WORKFLOW.md](../docs/FFCPE-WOR
 
 The run-workflow MCP only accepts sign-ins from local tools or Claude's hosted callback. A hosted backend gets `redirect_uri must be a loopback (localhost) URL or the Claude hosted callback`, which the plugin shows as a clear message. This mode only works if Adobe allowlists the backend's callback URL.
 
-**`FFCPE_MODE=api`.** REST Workflow API (`POST /batch/execute`, status, executions; contract in `https://run-workflow.adobe.io/openapi.json`) with an OAuth Server-to-Server credential. This needs Developer access in the org that owns the workflow. Set `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID` and, if your credential requires it, `FFCPE_IMS_USER_ID`. The default request body mirrors the Execute Graph snippet; override it with `FFCPE_EXECUTE_TEMPLATE` if needed.
+**`FFCPE_MODE=api`.** REST Workflow API (`POST /batch/execute`, status, executions; contract in `https://run-workflow.adobe.io/openapi.json`) with an OAuth Server-to-Server credential. This needs Developer access in the org that owns the workflow. Set `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID` and, if your credential requires it, `FFCPE_IMS_USER_ID`. The request body follows the published workflow's generated API request: `{ "workflow": { "workflowId" }, "inputs": [{ "node_id", "content": [{ "sourceUrl", "name" }] }] }`, with one input per node (the product photo, then any scene images). `FFCPE_EXECUTE_TEMPLATE` can replace the body, but only for workflows whose only input is the product photo.
 
 In both modes the workflow gets a 1-hour presigned App Builder Files URL to the exact Box file version (Box links aren't accepted as workflow input hosts).
 
-> **Which workflow runs?** The one the author picks on the Prepare step, from the admin-curated `FFCPE_WORKFLOWS` list. Or the single `FFCPE_WORKFLOW_ID` if no list is set. See [Choosing a workflow](../README.md#choosing-a-workflow).
+> **Which workflow runs?** The one the author picks on the Prepare step, from the admin-curated list (`workflows.json`, uploaded with `npm run workflows:upload`, or `FFCPE_WORKFLOWS`). Or the single `FFCPE_WORKFLOW_ID` if no list is set. Workflows can also take fixed scene images (backgrounds, masks) from private backend storage. See [Choosing a workflow](../README.md#choosing-a-workflow).
 
 ## Local Firefly bridge (DEMO ONLY)
 
@@ -170,6 +170,8 @@ For local development, use `ref=local`. Workspace then loads the plugin from `ht
 | Bridge prints "Backend bridge-next: Bridge token rejected" | The deployed `BRIDGE_TOKEN` differs from `.env`. Run `aio app deploy --force-deploy` (a plain deploy can skip unchanged actions), then `npm run bridge` |
 | "Adobe's Firefly sign-in did not accept this app's registration" | The MCP sign-in server refused dynamic registration for this redirect URI. Use `api` mode, or check `FIREFLY_REDIRECT_URI` |
 | Connect Firefly window closes but stays disconnected | Check `aio app logs` for `firefly-auth-callback`; the Adobe account may lack access to the workflow |
+| "… is missing scene images in backend storage" | Put the images under `looks/` at the paths in `workflows.json` and run `npm run workflows:upload` |
+| "The local Firefly bridge is out of date" | Update the backend folder and restart `npm run bridge`; older bridges only send the product photo |
 | `ffcpe-error … rejected the request` | Wrong workflow ID or node ID, the workflow isn't published, or (api mode) the request body doesn't match |
 | "desktop/mobile composites were not found (output nodes: …)" | The listed node IDs are what came back; set `FFCPE_DESKTOP_NODE_ID` / `FFCPE_MOBILE_NODE_ID` to the composite nodes |
 | `delivery-pending` | Asset approved but Dynamic Media isn't serving it yet. Retry Accept after a minute |
@@ -183,7 +185,7 @@ For local development, use `ref=local`. Workspace then loads the plugin from `ht
 
 ## Known limitations
 
-- Single Box connector, single store view, exact-SKU lookup, PNG/JPEG only, one workflow recipe.
+- Single Box connector, single store view, exact-SKU lookup, PNG/JPEG only, one product and one look per run.
 - MCP mode depends on the run-workflow MCP's sign-in and tool contract (`run_workflow_submit`, `run_workflow_get_status`), which may change; api mode is the stable route.
 - Insertion only; the plugin cannot read or replace existing blocks.
 - Price is not shown in the spotlight. The block links to the PDP, where pricing uses the storefront's customer context.
