@@ -16,14 +16,15 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 
 ## Contents
 
+- [Before you start](#before-you-start)
+  - [1. Application requirements](#1-application-requirements)
+  - [2. Access requirements](#2-access-requirements)
+  - [3. Values, credentials and secrets you'll fill in](#3-values-credentials-and-secrets-youll-fill-in)
 - [What it does](#what-it-does)
 - [Screenshots](#screenshots)
 - [Video walkthrough](#video-walkthrough)
 - [How it works](#how-it-works)
 - [Repository layout](#repository-layout)
-- [Requirements](#requirements)
-  - [Application requirements](#application-requirements)
-  - [Access requirements (to run it)](#access-requirements-to-run-it)
 - [Production readiness](#production-readiness)
 - [Install](#install)
 - [Using it](#using-it)
@@ -33,6 +34,92 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 - [Known limitations](#known-limitations)
 - [Roadmap](#roadmap)
 - [License](#license)
+
+## Before you start
+
+To run Creative Commerce Studio you need **all of these**:
+
+1. **An Edge Delivery Services Commerce storefront** in Adobe Experience Workspace (Document Authoring), based on AEM Boilerplate Commerce.
+2. **An Adobe Commerce catalog** the storefront reads: Adobe Commerce as a Cloud Service or Adobe Commerce Optimizer.
+3. **Adobe App Builder**, with the **Developer** role, for the backend (Node 22 and the `aio` CLI).
+4. **Box and/or Google Drive**, with an OAuth app you can create, and a campaign folder of authorized packshots.
+5. **Firefly Creative Production**, with a **published workflow**. To run it, either someone who keeps the local bridge running (demo) or a Firefly Services server-to-server credential (production).
+
+**Optional:** Product Visuals (AEM Assets with Dynamic Media with OpenAPI), for governed image delivery.
+
+The tables below give the detail: [what each part is for](#1-application-requirements), [who needs which access](#2-access-requirements) and [every value you'll fill in](#3-values-credentials-and-secrets-youll-fill-in). Then follow [Install](#install).
+
+### 1. Application requirements
+
+| Component | Required? | Used for | Notes |
+|---|---|---|---|
+| **Adobe Experience Workspace** site on **Edge Delivery Services** (Document Authoring) | Required | Hosts the library plugin; authors insert the block | The plugin uses the Workspace SDK (`https://da.live/nx/utils/sdk.js`) |
+| **AEM Boilerplate Commerce** storefront | Required | The block imports `CS_FETCH_GRAPHQL` and `getProductLink` from the site's `scripts/commerce.js` | Any site based on the Commerce boilerplate |
+| **Adobe Commerce** catalog: **Adobe Commerce as a Cloud Service** or **Adobe Commerce Optimizer** | Required | SKU lookup and the live product link (`products(skus:)` storefront query) | Tested with Adobe Commerce Optimizer. Uses the site's public `commerce-endpoint` and headers. No admin or catalog writes |
+| **Adobe App Builder** (Developer Console project and workspace, I/O Runtime, State, Files) | Required | The backend | Node 22, `aio` CLI |
+| **Box** (OAuth 2.0 "User Authentication" app) | At least one of Box / Drive | Source packshots | Free developer accounts work |
+| **Google Drive** (Google Cloud OAuth client, Web application, Drive API) | At least one of Box / Drive | Source packshots | Testing-mode OAuth for demos |
+| **Firefly Creative Production** | Required | Image production | At least one **published workflow** with a product-image input and desktop and mobile composite outputs, optionally with fixed scene images such as backgrounds and masks ([docs/FFCPE-WORKFLOW.md](docs/FFCPE-WORKFLOW.md)) |
+| **Product Visuals** (AEM Assets as a Cloud Service) with **Dynamic Media with OpenAPI** | Optional (recommended for production) | Durable, governed image delivery | Without it, images go to App Builder public storage |
+| Authorized creative | Required | Packshots, backgrounds and templates you are allowed to use and publish | — |
+
+### 2. Access requirements
+
+These are the accounts and roles needed to run the extension as it is today, in demo mode. What production needs is in [Production readiness](#production-readiness).
+
+| Who | Needs |
+|---|---|
+| **Site admin** | Write access to the site's code repo (adds the block, plugin and one config value). Access to the Workspace site config to add a **library** row. |
+| **Backend operator** | An Adobe org with **App Builder**, the **Developer** role in that org, a Developer Console project and workspace, and Node 22 with the `aio` CLI. |
+| **Box admin** | Creates the Box OAuth app. In enterprise Box, approves it under **Admin Console → Platform Apps**, added by Client ID. |
+| **Google admin** | A Google Cloud project with the **Drive API** enabled, and an OAuth consent screen (External, Testing) with authors listed as **test users**. |
+| **Firefly operator (bridge)** | Firefly Creative Production **user access** that can run the published workflow, and a computer running `npm run bridge` during use. All runs use this operator's identity. |
+| **Authors** | Edit access to the Workspace site, plus a Box and/or Google account with access to the campaign folder. |
+
+### 3. Values, credentials and secrets you'll fill in
+
+`<backend>` below means your backend URL, `https://<namespace>.adobeioruntime.net/api/v1/web/creative-commerce-studio`, where `<namespace>` is your App Builder workspace's Runtime namespace. **Secrets** go only in `backend/.env`, which is gitignored. Never commit them or paste them anywhere else.
+
+**Backend: `backend/.env`.** Start from [`backend/.env.example`](backend/.env.example), then deploy with `aio app deploy --force-deploy`.
+
+| Setting | Needed for | Secret | Where to get it |
+|---|---|---|---|
+| `AIO_runtime_namespace`, `AIO_runtime_auth` | always | **yes** | Written for you by `aio app use` |
+| `ALLOWED_ORIGINS` | always | no | Your hosts: `https://da.live`, `https://main--<site>--<org>.preview.da.live` (Workspace's plugin proxy), and your `.aem.page` and `.aem.live` hosts |
+| `IMS_ALLOWED_CLIENT_IDS` | always | no | `darkalley`, Experience Workspace's sign-in client |
+| `IMS_ALLOWED_ORGS` | optional | no | Your IMS org ID (`…@AdobeOrg`, Admin Console), to limit use to your org |
+| `TOKEN_ENCRYPTION_KEY` | always | **yes** | Generate one: `openssl rand -base64 32`. It encrypts stored Box, Google and Firefly sign-ins |
+| `BOX_CLIENT_ID`, `BOX_CLIENT_SECRET` | Box | secret: **yes** | Box Developer Console → your OAuth 2.0 (User Authentication) app → Configuration |
+| `BOX_REDIRECT_URI` | Box | no | `<backend>``/box-auth-callback`. Register the exact same URL in the Box app |
+| `BOX_ALLOWED_FOLDER_ID` | Box | no | The number at the end of the campaign folder's Box URL |
+| `GDRIVE_CLIENT_ID`, `GDRIVE_CLIENT_SECRET` | Google Drive | secret: **yes** | Google Cloud console → APIs & Services → Credentials → OAuth client ID (Web application) |
+| `GDRIVE_REDIRECT_URI` | Google Drive | no | `<backend>``/gdrive-auth-callback`. Add it as an Authorized redirect URI on the OAuth client |
+| `GDRIVE_ALLOWED_FOLDER_ID` | Google Drive | no | The ID at the end of the folder's Drive URL (`…/drive/folders/<ID>`) |
+| `FFCPE_MODE` | always | no | `bridge` (demo, local bridge) or `api` (production, server-to-server credential) |
+| `BRIDGE_TOKEN` | bridge mode | **yes** | Generate one: `openssl rand -hex 32`. The bridge reads the same `.env` |
+| `CCS_BACKEND_URL` | bridge mode, uploads | no | `<backend>` |
+| `ADMIN_TOKEN` | uploads outside bridge mode | **yes** | Generate one: `openssl rand -hex 32` |
+| `FFCPE_CLIENT_ID`, `FFCPE_CLIENT_SECRET`, `FFCPE_IMS_ORG_ID` (+ optional `FFCPE_IMS_USER_ID`) | api mode | secret: **yes** | Developer Console project in the Firefly org → Firefly Services API → OAuth Server-to-Server credential |
+| `DELIVERY_MODE` | optional | no | `public` (App Builder public storage, the default) or `aem` |
+| `AEM_AUTHOR_URL`, `AEM_DELIVERY_URL`, `AEM_CLIENT_ID`, `AEM_CLIENT_SECRET`, `AEM_SCOPES`, `AEM_TARGET_FOLDER` | aem delivery | secret: **yes** | Your AEM as a Cloud Service environment, plus a Developer Console OAuth Server-to-Server credential with AEM API access |
+
+**Workflows: `backend/workflows.json`.** Copy [`backend/workflows.example.json`](backend/workflows.example.json), fill it in, then run `npm run workflows:upload`. Nothing in it is secret.
+
+| Value | Where to get it |
+|---|---|
+| `workflowId` | The **published** workflow's execution ID in Firefly Creative Production, not the editable Builder source ID |
+| `productNodeId`, `desktopNodeId`, `mobileNodeId` | Node IDs of the product-photo input and the final desktop and mobile composites. They're in the published workflow's generated API request (Execute Graph / cURL) |
+| `inputs` (optional) | For workflows with scene images: each input's node ID, plus the image file you put under `backend/looks/` |
+
+**Site and Workspace.** Nothing here is secret.
+
+| Where | Value |
+|---|---|
+| Site repo `config.json` (`public.default`) | `"creative-commerce-studio": { "backend-url": "<backend>" }`. The storefront's existing `commerce-endpoint` and headers are reused as they are |
+| Workspace site config → **library** sheet | Title `Creative Commerce Studio`; path `https://main--<site>--<org>.aem.page/tools/creative-commerce-studio/creative-commerce-studio.html`; image `…/tools/creative-commerce-studio/icon.svg` |
+| Box app / Google OAuth client | The redirect URIs above. In enterprise Box, approve the app under Admin Console → Platform Apps. In Google, list the authors as **test users** on the consent screen |
+
+The full list of settings, including the advanced ones, is in [Configuration reference](#configuration-reference).
 
 ## What it does
 
@@ -44,7 +131,7 @@ The Workspace library plugin walks the author through five steps:
 | **Source** | Pick **Box** or **Google Drive** and connect your own account. Browse one allowed campaign folder with thumbnails, choose a PNG or JPEG packshot, and **confirm** that it shows the product and that you may use it. |
 | **Prepare** | Pick a **workflow** from the site's curated list, then run that published Firefly Creative Production workflow on the **exact file version** you chose, for example background removal and then desktop and mobile composites. A progress bar shows while it runs. |
 | **Review** | Preview both placements. Edit headline, description, CTA label and alt text. Choose a **static** or **animated** presentation. **Accept** stores the images permanently. |
-| **Insert** | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. |
+| **Insert** | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. **New banner** starts over, and **Another for <SKU>** reuses the product. Connections and the workflow choice are kept. |
 
 On the storefront the block renders the responsive image, which is never cropped, plus the editable HTML copy and a native CTA. The CTA's product link is **resolved from Commerce at runtime**. If the SKU no longer exists, the CTA is hidden instead of linking to a missing product. The optional animated presentation is a one-time entrance, about 1.3 s, and is disabled for visitors who prefer reduced motion.
 
@@ -101,35 +188,6 @@ The secrets (Box, Google and Adobe credentials, and the encryption key) exist on
 | [`docs/FFCPE-WORKFLOW.md`](docs/FFCPE-WORKFLOW.md) | How to build and publish the Firefly workflow | — |
 | [`backend/README.md`](backend/README.md) | Detailed operator guide: every service's setup, deploy, troubleshooting | — |
 
-## Requirements
-
-### Application requirements
-
-| Component | Required? | Used for | Notes |
-|---|---|---|---|
-| **Adobe Experience Workspace** site on **Edge Delivery Services** (Document Authoring) | Required | Hosts the library plugin; authors insert the block | The plugin uses the Workspace SDK (`https://da.live/nx/utils/sdk.js`) |
-| **AEM Boilerplate Commerce** storefront | Required | The block imports `CS_FETCH_GRAPHQL` and `getProductLink` from the site's `scripts/commerce.js` | Any site based on the Commerce boilerplate |
-| **Adobe Commerce** catalog: **Adobe Commerce as a Cloud Service** or **Adobe Commerce Optimizer** | Required | SKU lookup and the live product link (`products(skus:)` storefront query) | Tested with Adobe Commerce Optimizer. Uses the site's public `commerce-endpoint` and headers. No admin or catalog writes |
-| **Adobe App Builder** (Developer Console project and workspace, I/O Runtime, State, Files) | Required | The backend | Node 22, `aio` CLI |
-| **Box** (OAuth 2.0 "User Authentication" app) | At least one of Box / Drive | Source packshots | Free developer accounts work |
-| **Google Drive** (Google Cloud OAuth client, Web application, Drive API) | At least one of Box / Drive | Source packshots | Testing-mode OAuth for demos |
-| **Firefly Creative Production** | Required | Image production | A **published workflow** with one product-image input and desktop and mobile composite outputs ([docs/FFCPE-WORKFLOW.md](docs/FFCPE-WORKFLOW.md)) |
-| **Product Visuals** (AEM Assets as a Cloud Service) with **Dynamic Media with OpenAPI** | Optional (recommended for production) | Durable, governed image delivery | Without it, images go to App Builder public storage |
-| Authorized creative | Required | Packshots, backgrounds and templates you are allowed to use and publish | — |
-
-### Access requirements (to run it)
-
-These are the accounts and roles needed to run the extension as it is today, in demo mode. What production needs comes in the next section.
-
-| Who | Needs |
-|---|---|
-| **Site admin** | Write access to the site's code repo (adds the block, plugin and one config value). Access to the Workspace site config to add a **library** row. |
-| **Backend operator** | An Adobe org with **App Builder**, the **Developer** role in that org, a Developer Console project and workspace, and Node 22 with the `aio` CLI. |
-| **Box admin** | Creates the Box OAuth app. In enterprise Box, approves it under **Admin Console → Platform Apps**, added by Client ID. |
-| **Google admin** | A Google Cloud project with the **Drive API** enabled, and an OAuth consent screen (External, Testing) with authors listed as **test users**. |
-| **Firefly operator (bridge)** | Firefly Creative Production **user access** that can run the published workflow, and a computer running `npm run bridge` during use. All runs use this operator's identity. |
-| **Authors** | Edit access to the Workspace site, plus a Box and/or Google account with access to the campaign folder. |
-
 ## Production readiness
 
 > [!IMPORTANT]
@@ -183,7 +241,7 @@ The short version is below. Every step is detailed in **[backend/README.md](back
 3. **Source**: choose **Box** or **Google Drive**, connect, open the folder, pick a packshot, and tick the confirmation.
 4. **Prepare**: choose the **workflow** (for example a Campaign Look) if the site offers several, then **Run production**. With the bridge, the run starts as soon as the bridge picks it up. The progress bar and elapsed time show while Firefly works, which can take up to about 10 minutes.
 5. **Review**: check both placements, edit the copy, choose **Static** or **Animated entrance**, then **Accept and deliver**.
-6. **Insert**: **Insert into page**, then save and preview the page as usual.
+6. **Insert**: **Insert into page**, then save and preview the page as usual. To make another, choose **New banner**, or **Another for <SKU>** to keep the same product. The finished banner stays under **Recent jobs** on the Product step.
 
 The block can also be authored by hand. It's a two-column key/value table with these rows: `SKU`, `Headline`, `Description`, `Desktop image`, `Mobile image`, `Image alt`, `CTA label`, `Presentation` (`static` | `animated`). See [block/creative-product-spotlight/README.md](block/creative-product-spotlight/README.md).
 
