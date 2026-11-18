@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1 — 2026-11-18
+
+- **Unique scene image names** in the example and docs: `<look>-<channel>-<part>`, for example `looks/workshop/workshop-desktop-background.jpg`.
+- **Scene checks** flag a file whose extension doesn't match its real type (renaming `.png` to `.jpg` doesn't convert it), with a fix hint. 77 tests.
+
 ## 0.6.0 — 2026-11-18
 
 - **Workflows with scene images** (for example Campaign Looks). A workflow entry can list fixed `inputs`, such as backgrounds and placement masks, that the backend sends with every run from private App Builder storage. Each look is its own entry in the picker.
