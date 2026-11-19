@@ -2,7 +2,7 @@
 
 **Turn product masters in Box or Google Drive into shoppable, placement-ready storefront banners without leaving Adobe Experience Workspace.**
 
-▶ **[Watch the 4:23 walkthrough](#video-walkthrough)**
+▶ **[Watch the 7:06 walkthrough](#video-walkthrough)**
 
 An author picks a product by SKU, chooses an authorized packshot from Box or Google Drive, and runs a published **Firefly Creative Production** workflow that produces desktop and mobile compositions. They review the result, then insert a **Creative Product Spotlight** block at the cursor. On the storefront, the block links to the live **Adobe Commerce** product.
 
@@ -161,11 +161,11 @@ The plugin in Experience Workspace's side panel, from a real end-to-end run (Goo
 
 ## Video walkthrough
 
-[![Creative Commerce Studio walkthrough, 4:23: the finished spotlight banner on the page next to the plugin's Insert step](docs/images/walkthrough-poster.jpg)](docs/videos/creative-commerce-studio-walkthrough.mp4)
+https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888
 
-**[Watch the 4:23 walkthrough](docs/videos/creative-commerce-studio-walkthrough.mp4)** (MP4, 11 MB). GitHub doesn't play videos stored in a repository, so the link opens the file page, where **Download** saves it for any video player.
+A 7:06 walkthrough, recorded on 2026-11-19. It shows the Commerce storefront, then Creative Commerce Studio in Experience Workspace, including choosing a **Campaign Look** on the Prepare step and running it through the local Firefly bridge. If the player doesn't appear, [open the video directly](https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888).
 
-Recorded on 2026-11-15: a full run from Google Drive through Firefly Creative Production to the spotlight on the page. Later additions (Campaign Looks workflows with scene images, **New banner** and the **Setup check**) aren't in it yet.
+An earlier 4:23 recording from 2026-11-15 is kept at [`docs/videos/creative-commerce-studio-walkthrough.mp4`](docs/videos/creative-commerce-studio-walkthrough.mp4) (download only).
 
 ## How it works
 
