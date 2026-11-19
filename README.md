@@ -2,9 +2,30 @@
 
 **Turn product masters in Box or Google Drive into shoppable, placement-ready storefront banners without leaving Adobe Experience Workspace.**
 
-▶ **[Watch the 7:06 walkthrough](#video-walkthrough)**
-
 An author picks a product by SKU, chooses an authorized packshot from Box or Google Drive, and runs a published **Firefly Creative Production** workflow that produces desktop and mobile compositions. They review the result, then insert a **Creative Product Spotlight** block at the cursor. On the storefront, the block links to the live **Adobe Commerce** product.
+
+## Video walkthrough
+
+https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888
+
+A 7:06 walkthrough, recorded on 2026-11-19. It shows the Commerce storefront, then Creative Commerce Studio in Experience Workspace, including choosing a **Campaign Look** on the Prepare step and running it through the local Firefly bridge. If the player doesn't appear, [open the video directly](https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888).
+
+## Screenshots
+
+The plugin in Experience Workspace's side panel, from a real end-to-end run (Google Drive → Firefly Creative Production → insert).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/01-product.jpg" width="200" alt="Product step: exact-SKU lookup shows the product, stock status and the product page link"><br><sub><b>1. Product</b>: exact-SKU lookup</sub></td>
+    <td align="center"><img src="docs/images/02-source.jpg" width="200" alt="Source step: Box or Google Drive picker, campaign folder thumbnails, selected packshot and authorization confirmation"><br><sub><b>2. Source</b>: Box or Google Drive, confirm the file</sub></td>
+    <td align="center"><img src="docs/images/03-prepare.jpg" width="200" alt="Prepare step: workflow steps, demo-mode notice, local Firefly bridge online, job delivered"><br><sub><b>3. Prepare</b>: Firefly Creative Production run</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/04-review.jpg" width="200" alt="Review step: desktop 1200x896 and mobile 896x1200 placements with editable headline, description and CTA"><br><sub><b>4. Review</b>: placements and copy</sub></td>
+    <td align="center"><img src="docs/images/05-insert.jpg" width="200" alt="Insert step: summary of SKU, copy, presentation and permanent image URLs with the Insert into page button"><br><sub><b>5. Insert</b>: block at the cursor</sub></td>
+    <td></td>
+  </tr>
+</table>
 
 > [!WARNING]
 > **This is a working demo, not a production-ready integration.**
@@ -18,13 +39,13 @@ An author picks a product by SKU, chooses an authorized packshot from Box or Goo
 
 ## Contents
 
+- [Video walkthrough](#video-walkthrough)
+- [Screenshots](#screenshots)
 - [Before you start](#before-you-start)
   - [1. Application requirements](#1-application-requirements)
   - [2. Access requirements](#2-access-requirements)
   - [3. Values, credentials and secrets you'll fill in](#3-values-credentials-and-secrets-youll-fill-in)
 - [What it does](#what-it-does)
-- [Screenshots](#screenshots)
-- [Video walkthrough](#video-walkthrough)
 - [How it works](#how-it-works)
 - [Repository layout](#repository-layout)
 - [Production readiness](#production-readiness)
@@ -130,42 +151,17 @@ The full list of settings, including the advanced ones, is in [Configuration ref
 
 ## What it does
 
-The Workspace library plugin walks the author through five steps:
+The Workspace library plugin walks the author through five steps. To see it in action, watch the [video walkthrough](#video-walkthrough) or browse the [screenshots](#screenshots).
 
 | Step | What happens |
 |---|---|
-| **Product** | Exact-SKU lookup against the site's own Commerce catalog endpoint and store context. Shows name, type, stock and the product page link. |
-| **Source** | Pick **Box** or **Google Drive** and connect your own account. Browse one allowed campaign folder with thumbnails, choose a PNG or JPEG packshot, and **confirm** that it shows the product and that you may use it. |
-| **Prepare** | Pick a **workflow** from the site's curated list, then run that published Firefly Creative Production workflow on the **exact file version** you chose, for example background removal and then desktop and mobile composites. A progress bar shows while it runs. |
-| **Review** | Preview both placements. Edit headline, description, CTA label and alt text. Choose a **static** or **animated** presentation. **Accept** stores the images permanently. |
-| **Insert** | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. **New banner** starts over, and **Another for <SKU>** reuses the product. Connections and the workflow choice are kept. |
+| **Product** ([screenshot](docs/images/01-product.jpg)) | Exact-SKU lookup against the site's own Commerce catalog endpoint and store context. Shows name, type, stock and the product page link. |
+| **Source** ([screenshot](docs/images/02-source.jpg)) | Pick **Box** or **Google Drive** and connect your own account. Browse one allowed campaign folder with thumbnails, choose a PNG or JPEG packshot, and **confirm** that it shows the product and that you may use it. |
+| **Prepare** ([screenshot](docs/images/03-prepare.jpg)) | Pick a **workflow** from the site's curated list, then run that published Firefly Creative Production workflow on the **exact file version** you chose, for example background removal and then desktop and mobile composites. A progress bar shows while it runs. |
+| **Review** ([screenshot](docs/images/04-review.jpg)) | Preview both placements. Edit headline, description, CTA label and alt text. Choose a **static** or **animated** presentation. **Accept** stores the images permanently. |
+| **Insert** ([screenshot](docs/images/05-insert.jpg)) | Inserts a `creative-product-spotlight` block at the cursor. Nothing is published; the author saves and previews as usual. **New banner** starts over, and **Another for <SKU>** reuses the product. Connections and the workflow choice are kept. |
 
 On the storefront the block renders the responsive image, which is never cropped, plus the editable HTML copy and a native CTA. The CTA's product link is **resolved from Commerce at runtime**. If the SKU no longer exists, the CTA is hidden instead of linking to a missing product. The optional animated presentation is a one-time entrance, about 1.3 s, and is disabled for visitors who prefer reduced motion.
-
-## Screenshots
-
-The plugin in Experience Workspace's side panel, from a real end-to-end run (Google Drive → Firefly Creative Production → insert).
-
-<table>
-  <tr>
-    <td align="center"><img src="docs/images/01-product.jpg" width="200" alt="Product step: exact-SKU lookup shows the product, stock status and the product page link"><br><sub><b>1. Product</b>: exact-SKU lookup</sub></td>
-    <td align="center"><img src="docs/images/02-source.jpg" width="200" alt="Source step: Box or Google Drive picker, campaign folder thumbnails, selected packshot and authorization confirmation"><br><sub><b>2. Source</b>: Box or Google Drive, confirm the file</sub></td>
-    <td align="center"><img src="docs/images/03-prepare.jpg" width="200" alt="Prepare step: workflow steps, demo-mode notice, local Firefly bridge online, job delivered"><br><sub><b>3. Prepare</b>: Firefly Creative Production run</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/images/04-review.jpg" width="200" alt="Review step: desktop 1200x896 and mobile 896x1200 placements with editable headline, description and CTA"><br><sub><b>4. Review</b>: placements and copy</sub></td>
-    <td align="center"><img src="docs/images/05-insert.jpg" width="200" alt="Insert step: summary of SKU, copy, presentation and permanent image URLs with the Insert into page button"><br><sub><b>5. Insert</b>: block at the cursor</sub></td>
-    <td></td>
-  </tr>
-</table>
-
-## Video walkthrough
-
-https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888
-
-A 7:06 walkthrough, recorded on 2026-11-19. It shows the Commerce storefront, then Creative Commerce Studio in Experience Workspace, including choosing a **Campaign Look** on the Prepare step and running it through the local Firefly bridge. If the player doesn't appear, [open the video directly](https://github.com/user-attachments/assets/f4f1c8ff-22bf-4bd1-8d05-bd5e54fbb888).
-
-An earlier 4:23 recording from 2026-11-15 is kept at [`docs/videos/creative-commerce-studio-walkthrough.mp4`](docs/videos/creative-commerce-studio-walkthrough.mp4) (download only).
 
 ## How it works
 
@@ -197,6 +193,7 @@ The secrets (Box, Google and Adobe credentials, and the encryption key) exist on
 | [`backend/`](backend/) | **App Builder** project: web actions, tests, the local Firefly bridge | Deployed with `aio app deploy` |
 | [`docs/PRODUCTION-READINESS.md`](docs/PRODUCTION-READINESS.md) | What production use requires, per service | — |
 | [`docs/FFCPE-WORKFLOW.md`](docs/FFCPE-WORKFLOW.md) | How to build and publish the Firefly workflow | — |
+| [`docs/videos/`](docs/videos/) | An earlier 4:23 walkthrough from 2026-11-15, download only. The current video is at the [top](#video-walkthrough) | — |
 | [`backend/README.md`](backend/README.md) | Detailed operator guide: every service's setup, deploy, troubleshooting | — |
 
 ## Production readiness
