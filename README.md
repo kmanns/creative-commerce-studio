@@ -182,6 +182,9 @@ flowchart LR
   BLK -- "images" --> DEL
   classDef demo stroke-dasharray: 5 4,stroke:#b7791f,fill:#fffaf0
   class BR demo
+  FF ~~~ SP[" "]
+  classDef spacer fill:none,stroke:none,color:transparent
+  class SP spacer
 ```
 
 Solid lines are always used. Dashed lines are the **demo-only** local bridge, which production replaces with the Workflow API.
