@@ -47,6 +47,7 @@ The plugin in Experience Workspace's side panel, from a real end-to-end run (Goo
   - [3. Values, credentials and secrets you'll fill in](#3-values-credentials-and-secrets-youll-fill-in)
 - [What it does](#what-it-does)
 - [How it works](#how-it-works)
+  - [A run, step by step](#a-run-step-by-step)
 - [Repository layout](#repository-layout)
 - [Production readiness](#production-readiness)
 - [Install](#install)
@@ -165,24 +166,67 @@ On the storefront the block renders the responsive image, which is never cropped
 
 ## How it works
 
-```
-Experience Workspace (da.live)
- └─ Library plugin (plugin/, hosted on the site at /tools/creative-commerce-studio/)
-     ├─ Commerce catalog ─────────────► storefront GraphQL endpoint + headers from the site's config.json
-     ├─ Box / Google Drive ───┐
-     ├─ production jobs ──────┼──────► App Builder web actions (backend/)
-     │                        │          ├─ author identity: Experience Workspace IMS token, validated with IMS
-     │                        │          ├─ Box + Google Drive OAuth (PKCE), encrypted per-author tokens, folder allow-list
-     │                        │          ├─ job records (App Builder State) + working files (App Builder Files)
-     │                        │          ├─ Firefly Creative Production
-     │                        │          │    ├─ api:    REST Workflow API, server-to-server credential   ← production
-     │                        │          │    └─ bridge: local script on the operator's computer         ← demo
-     │                        │          └─ delivery: Product Visuals / AEM Assets (aem) or App Builder public storage (public)
-     └─ insert ───────────────────────► Creative Product Spotlight block (block/, in the site's blocks/)
-                                          └─ storefront: live product link via the site's Commerce catalog client
+```mermaid
+flowchart LR
+  A(["Author in<br/>Experience Workspace"]) --> P["Creative Commerce Studio<br/>library plugin"]
+  P -- "SKU lookup" --> CAT["Adobe Commerce<br/>catalog"]
+  P -- "author's IMS token" --> W["App Builder<br/>web actions"]
+  W -- "on Accept" --> DEL["Product Visuals,<br/>or App Builder storage"]
+  W -- "author's sign-in,<br/>read-only" --> SRC["Box or<br/>Google Drive"]
+  W -- "production:<br/>Workflow API" --> FF["Firefly Creative<br/>Production"]
+  W --- ST[("State and Files<br/>jobs · sign-ins · images")]
+  BR["Local bridge<br/>demo only"] -. "polls for jobs" .-> W
+  BR -. "demo: operator's<br/>own sign-in" .-> FF
+  P -- "inserts the block" --> A
+  BLK["Spotlight block<br/>on the live page"] -- "product link" --> CAT
+  BLK -- "images" --> DEL
+  classDef demo stroke-dasharray: 5 4,stroke:#b7791f,fill:#fffaf0
+  class BR demo
 ```
 
+Solid lines are always used. Dashed lines are the **demo-only** local bridge, which production replaces with the Workflow API.
+
+| Connection | How it's secured |
+|---|---|
+| Plugin → App Builder | The author's Experience Workspace (IMS) token, validated with Adobe IMS on every call. The plugin only calls the backend URL in the site's `config.json`. |
+| Plugin → Commerce catalog | The storefront's own public catalog endpoint and headers from `config.json`. Read-only, no admin access. |
+| App Builder → Box / Google Drive | Each author's own OAuth sign-in (Google's with PKCE). Read-only, limited to one campaign folder. Stored encrypted with `TOKEN_ENCRYPTION_KEY`. |
+| App Builder → Firefly, **production** | The Workflow API with an OAuth server-to-server credential. Firefly fetches the packshot and any scene images through 1-hour links to private App Builder Files. |
+| Local bridge → App Builder, **demo** | `BRIDGE_TOKEN`. The bridge runs each workflow through the run-workflow MCP with the operator's own Adobe sign-in. |
+| App Builder → approved images | Product Visuals with an OAuth server-to-server credential (`DELIVERY_MODE=aem`), or App Builder public storage (`public`). |
+| Plugin → page | `actions.sendHTML` inserts the block at the cursor. Nothing is published. |
+| Live page | The block gets the product link from Commerce at runtime and shows the approved images. |
+
 The secrets (Box, Google and Adobe credentials, and the encryption key) exist only as App Builder action inputs. The browser never sees a third-party token, and published pages contain only the SKU, the copy and the image URLs.
+
+### A run, step by step
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Author
+  participant Plugin as Plugin in Workspace
+  participant Backend as App Builder backend
+  participant Source as Box or Google Drive
+  participant Firefly as Firefly Creative Production
+  Author->>Plugin: Pick SKU, packshot and workflow
+  Plugin->>Backend: job-submit, with the author's IMS token
+  Backend->>Backend: Check the workflow's scene images
+  Backend->>Source: Download the exact file version
+  Backend->>Backend: Store the packshot in Files
+  Backend->>Firefly: Run the workflow: product photo plus scene images, as 1-hour links
+  Note over Backend,Firefly: Demo: through the local bridge. Production: the REST Workflow API.
+  loop Every few seconds
+    Plugin->>Backend: job-status
+    Backend-->>Plugin: Progress
+  end
+  Firefly-->>Backend: Desktop and mobile composites, matched by node ID
+  Backend->>Backend: Copy both into Files as temporary previews
+  Author->>Plugin: Review, edit the copy, Accept
+  Plugin->>Backend: job-accept
+  Backend->>Backend: Deliver to App Builder public storage or Product Visuals
+  Plugin->>Author: Insert the Spotlight block at the cursor
+```
 
 ## Repository layout
 
